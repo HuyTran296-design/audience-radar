@@ -44,13 +44,14 @@ It does not access:
 - account passwords
 - voting actions
 - moderation actions
-- deleted Reddit content
 
 ## 3. Reddit Data Retention
 
 Current implementation status: Reddit deletion handling is not yet enabled because live Reddit API access is pending approval. Before production use, the Reddit adapter will implement deletion handling for removed posts/comments and deleted accounts in accordance with Reddit's current Data API requirements.
 
 Audience Radar is designed to retain only the Reddit data necessary for its approved use case. Reddit-sourced content and related user data will be removed when required by Reddit's policies, applicable terms, an approved use case, or a valid deletion request.
+
+The implementation will follow Reddit's current deletion requirements, including the recommended routine deletion window where applicable.
 
 ## 4. What Audience Radar is
 
@@ -121,4 +122,4 @@ Audience Radar is an internal tool and does not provide Reddit users with an acc
 
 Reddit-sourced data is used only for the approved audience-research workflow and is not sold, licensed, or redistributed.
 
-A privacy policy will be provided before production use where required by Reddit's Developer Terms and applicable law.
+A privacy policy will be provided before production use and will describe how Reddit-sourced data is collected, used, stored, retained, and deleted.
