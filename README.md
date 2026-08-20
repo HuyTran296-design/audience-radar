@@ -23,12 +23,12 @@ The Reddit integration:
 - Reads publicly accessible posts and comments within explicitly configured communities.
 - Does not access private messages or private communities.
 - Does not post, comment, vote, moderate, or automate Reddit accounts.
-- Does not scrape Reddit pages.
+- Does not scrape Reddit pages. All Reddit data access is performed through OAuth-authenticated Reddit API requests.
 - Does not bypass authentication, rate limits, anti-bot protections, paywalls, or other technical controls.
 - Monitors API rate-limit information and backs off when required.
 - Does not sell, license, or redistribute Reddit content.
-- Does not use Reddit content to train, fine-tune, or otherwise improve an AI/ML model unless explicitly permitted by Reddit and the applicable rights holders.
-- Keeps source references so findings can be traced back to the original Reddit conversation.
+- Does not use Reddit content to train, fine-tune, or otherwise improve AI/ML models.
+- Keeps source references linking back to the original Reddit post or comment, including the applicable Reddit attribution required by Reddit's Developer Terms.
 - Applies human review before insights are used downstream.
 - Removes Reddit content when required by Reddit's policies or the approved use case.
 
@@ -44,15 +44,13 @@ It does not access:
 - account passwords
 - voting actions
 - moderation actions
+- deleted Reddit content
 
 ## 3. Reddit Data Retention
 
-Audience Radar stores only the Reddit data necessary for its approved use case.
-The system does not intentionally retain deleted Reddit content.
-Reddit-sourced content and user-related data are subject to deletion when required by Reddit's policies, applicable terms, or an approved use case.
-Source identifiers and metadata are kept only as necessary for traceability and compliance.
+Current implementation status: Reddit deletion handling is not yet enabled because live Reddit API access is pending approval. Before production use, the Reddit adapter will implement deletion handling for removed posts/comments and deleted accounts in accordance with Reddit's current Data API requirements.
 
-*(Note: Deletion handling is part of the Reddit adapter compliance implementation and must be completed before production use.)*
+Audience Radar is designed to retain only the Reddit data necessary for its approved use case. Reddit-sourced content and related user data will be removed when required by Reddit's policies, applicable terms, an approved use case, or a valid deletion request.
 
 ## 4. What Audience Radar is
 
@@ -74,7 +72,7 @@ Audience Radar extracts the following core insights:
 ## 6. How the system works
 
 ```text
-Sources (e.g., Official Reddit API)
+Sources (e.g., Reddit Data API)
         ↓  Collection Layer        minimally necessary source data
         ↓  Normalization Layer     one canonical shape for analysis
         ↓  Storage Layer           retrieval metadata + normalized records
@@ -85,7 +83,7 @@ Sources (e.g., Official Reddit API)
 
 Two non-negotiable properties:
 
-1. **Evidence-first:** Every insight carries source references linking back to the original Reddit post or comment where applicable.
+1. **Evidence-first:** Every insight carries source references linking back to the original Reddit post or comment, including the applicable Reddit attribution required by Reddit's Developer Terms.
 2. **Analysis Separation:** AI-generated interpretations are separated from source data. Reddit-sourced content can be removed when required by Reddit's policies or deletion requirements.
 
 ## 7. AI Agents
@@ -96,14 +94,16 @@ The system uses specialized AI agents to analyze retrieved content:
 - **Trend Agent:** Compares aligned time windows and classifies momentum.
 - **Radar Agent:** Writes the weekly executive summary from trusted insights only.
 
-**Important constraint:** These agents operate on normalized research records and do not train models on Reddit content. LLMs are used solely for the analysis of retrieved content; Reddit content is not used to train or fine-tune models.
+**Important constraint:** These agents operate on normalized research records derived from retrieved content for the approved use case. LLMs are used solely for the analysis of retrieved content; Reddit content is not used to train or fine-tune models.
 
 ## 8. Development & Implementation Rules
 
 1. Never implement a collection method that bypasses authentication, anti-bot protection, paywalls, or private-group access. 
-2. Do not use Reddit content to train, fine-tune, or otherwise improve an AI/ML model unless explicitly permitted by Reddit and the applicable rights holders.
+2. Do not use Reddit content to train, fine-tune, or otherwise improve AI/ML models.
 3. The Reddit adapter must monitor Reddit API rate-limit headers and back off when limits are approached. It must not intentionally exceed or circumvent Reddit API limits.
 4. Nothing is published downstream that hasn't been human-reviewed.
+5. Preserve required Reddit attribution for Reddit-sourced content displayed by the application, including source links and applicable author attribution.
+6. The Reddit adapter will routinely check for removed content and account deletions and implement deletion handling consistent with Reddit's current requirements.
 
 ## 9. Roadmap
 
@@ -114,3 +114,11 @@ The system uses specialized AI agents to analyze retrieved content:
 | 2 | Audience insight extraction |
 | 3 | Human review and reporting |
 | 4 | Additional approved data sources |
+
+## 10. Privacy
+
+Audience Radar is an internal tool and does not provide Reddit users with an account or user-facing Reddit features.
+
+Reddit-sourced data is used only for the approved audience-research workflow and is not sold, licensed, or redistributed.
+
+A privacy policy will be provided before production use where required by Reddit's Developer Terms and applicable law.
