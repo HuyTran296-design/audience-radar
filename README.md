@@ -1,5 +1,11 @@
 # Audience Radar — Documentation Package
 
+> **Reddit Integration Note**
+> 
+> **Status:** Pending Reddit Data API approval.
+> 
+> The Reddit adapter is implemented as an external, read-only data source. OAuth credentials are not included in this repository and are managed securely via environment variables.
+
 **Version:** 1.0 (specification freeze for implementation)
 **Status:** Phase 0 complete — ready for an AI coding agent (Antigravity) to implement
 **Owner:** Product / Growth
