@@ -1,0 +1,23 @@
+version: 1
+
+audience:
+  id: calm_productivity
+  name: "Busy knowledge workers seeking calmer routines"
+  description: >
+    28–45, desk/WFH professionals, often lapsed meditation-app users. Notification-tolerant.
+    Value privacy and minimalism. Overlap with ADHD-adjacent routine seekers. English-first, global.
+  goals:
+    - "build a sustainable daily routine without another complicated system"
+    - "reduce screen-driven stress during the workday"
+    - "keep focus during long desk sessions"
+  not_our_audience:
+    - "clinical mental-health treatment seekers"
+    - "hardcore biohacking / supplement stacks"
+    - "enterprise wellness procurement"
+  segments:
+    - beginner
+    - routine_rebuilder
+    - adhd_adjacent
+    - founder
+  languages: [en]
+  primary_countries: [US, GB, CA, AU]

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audience Radar UI</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --surface: #ffffff;
+            --border: #e9ecef;
+            --text: #212529;
+            --text-light: #6c757d;
+            --primary: #000000;
+            --radius: 8px;
+            --accent-pain: #ffe3e3;
+            --accent-pain-text: #c92a2a;
+            --accent-question: #e3fafc;
+            --accent-question-text: #0b7285;
+            --accent-objection: #fff3bf;
+            --accent-objection-text: #e67700;
+            --accent-phrase: #f3f0ff;
+            --accent-phrase-text: #5f3dc4;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+        h1 { margin: 0 0 0.5rem; font-size: 1.5rem; font-weight: 600; }
+        p { margin: 0; color: var(--text-light); }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+        }
+        .sidebar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            height: fit-content;
+        }
+        .theme-list { list-style: none; padding: 0; margin: 0; }
+        .theme-list li {
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+        }
+        .theme-list li:hover { background: var(--bg); }
+        .theme-list li.active { background: var(--primary); color: white; font-weight: 500; }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+        }
+        .panel h2 {
+            font-size: 1.1rem;
+            margin: 0 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .list { display: flex; flex-direction: column; gap: 1rem; }
+        
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            align-items: flex-start;
+        }
+        .card-title { font-weight: 500; }
+        .badge {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .badge.pain { background: var(--accent-pain); color: var(--accent-pain-text); }
+        .badge.question { background: var(--accent-question); color: var(--accent-question-text); }
+        .badge.objection { background: var(--accent-objection); color: var(--accent-objection-text); }
+        .badge.phrase { background: var(--accent-phrase); color: var(--accent-phrase-text); }
+        
+        .stat { font-size: 0.8rem; color: var(--text-light); margin-top: 0.5rem; display: flex; gap: 1rem; }
+        
+        .phrase-exact {
+            font-family: monospace;
+            background: var(--bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--accent-phrase-text);
+        }
+        
+        .generate-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .generate-box input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .generate-box button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.6rem;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 500;
+        }
+        .generate-box button:hover { opacity: 0.9; }
+        .generate-box button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .source-link {
+            font-size: 0.8rem;
+            color: #0b7285;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
+        .source-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Audience Radar: Insight Explorer</h1>
+            <p>Identify pain points, FAQs, objections, and exact wording directly from real sources.</p>
+        </header>
+        
+        <div class="grid">
+            <aside class="sidebar">
+                <div class="generate-box">
+                    <input type="text" id="topic-input" placeholder="e.g. Meditation cushions" />
+                    <button id="btn-generate" onclick="generateTopic()">Generate (Live Miner)</button>
+                </div>
+                
+                <h3 style="margin-top:0;font-size:0.9rem;color:var(--text-light);text-transform:uppercase;letter-spacing:0.5px;">Themes</h3>
+                <ul class="theme-list" id="theme-list">
+                    <li class="active" onclick="filterByTheme('all', this)">All Themes</li>
+                    <!-- Loaded dynamically -->
+                </ul>
+            </aside>
+            
+            <main class="content">
+                <div class="panel" style="grid-column: span 2;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h2>Apple Ads Search Intelligence <span class="badge" style="background:#e7f5ff;color:#1864ab;">Tier 2</span></h2>
+                            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 12px;">Top Search Signals correlated with audience relevance</p>
+                        </div>
+                        <div>
+                            <input type="file" id="csv-upload" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+                            <button onclick="document.getElementById('csv-upload').click()" style="background: white; border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-dark);">
+                                📥 Import CSV
+                            </button>
+                        </div>
+                    </div>
+                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-top: 10px;">
+                        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
+                            <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                                <tr style="text-align: left; border-bottom: 1px solid var(--border);">
+                                    <th style="padding: 12px; color: var(--text-light); font-weight: 500;">Keyword</th>
+                                    <th style="padding: 12px; color: var(--text-light); font-weight: 500;">Demand Score</th>
+                                    <th style="padding: 12px; color: var(--text-light); font-weight: 500;">Trend</th>
+                                    <th style="padding: 12px; color: var(--text-light); font-weight: 500;">Intent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="list-search">
+                                <tr><td colspan="4" style="padding:12px; text-align:center; color:gray;">Import a CSV to see keyword data.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <h2>Pain Points <span class="badge pain" id="count-pain">0</span></h2>
+                    <div class="list" id="list-pain"></div>
+                </div>
+                
+                <div class="panel">
+                    <h2>Frequently Asked Questions <span class="badge question" id="count-question">0</span></h2>
+                    <div class="list" id="list-question"></div>
+                </div>
+                
+                <div class="panel">
+                    <h2>Objections <span class="badge objection" id="count-objection">0</span></h2>
+                    <div class="list" id="list-objection"></div>
+                </div>
+                
+                <div class="panel">
+                    <h2>Exact Wording <span class="badge phrase" id="count-phrase">0</span></h2>
+                    <div class="list" id="list-phrase"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let allInsights = { pain_points: [], questions: [], objections: [], phrases: [] };
+        
+        async function loadData() {
+            try {
+                const [themesRes, insightsRes, signalsRes] = await Promise.all([
+                    fetch('/api/themes'),
+                    fetch('/api/insights'),
+                    fetch('/api/search_signals')
+                ]);
+                
+                const themes = await themesRes.json();
+                allInsights = await insightsRes.json();
+                const signals = await signalsRes.json();
+                
+                // Render signals
+                const ls = document.getElementById('list-search');
+                if (signals.length > 0) {
+                    ls.innerHTML = signals.map(s => `
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 12px; font-weight: 500;">${s.keyword}</td>
+                            <td style="padding: 12px;">
+                                <span style="background: ${s.popularity > 80 ? '#fff5f5' : '#f8f9fa'}; color: ${s.popularity > 80 ? '#e03131' : '#495057'}; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${s.popularity}</span>
+                            </td>
+                            <td style="padding: 12px; font-size: 0.85rem; color: #5c940d;">${s.trend}</td>
+                            <td style="padding: 12px; font-size: 0.85rem;">${s.intent}</td>
+                        </tr>
+                    `).join('');
+                }
+                
+                const themeList = document.getElementById('theme-list');
+                themeList.innerHTML = '<li class="active" onclick="filterByTheme(\'all\', this)">All Themes</li>';
+                themes.forEach(t => {
+                    const li = document.createElement('li');
+                    li.dataset.id = t.id;
+                    li.style.display = 'flex';
+                    li.style.justifyContent = 'space-between';
+                    li.style.alignItems = 'center';
+                    
+                    const span = document.createElement('span');
+                    span.textContent = t.label;
+                    span.style.flex = "1";
+                    
+                    const delBtn = document.createElement('span');
+                    delBtn.innerHTML = '✕';
+                    delBtn.style.cursor = 'pointer';
+                    delBtn.style.fontSize = '0.75rem';
+                    delBtn.style.opacity = '0.5';
+                    delBtn.style.padding = '0 5px';
+                    delBtn.title = 'Delete Topic';
+                    delBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteTopic(t.id);
+                    };
+                    
+                    delBtn.onmouseover = () => delBtn.style.opacity = '1';
+                    delBtn.onmouseout = () => delBtn.style.opacity = '0.5';
+                    
+                    li.appendChild(span);
+                    li.appendChild(delBtn);
+                    
+                    li.onclick = () => {
+                        document.getElementById('topic-input').value = t.label;
+                        filterByTheme(t.id, li);
+                    };
+                    themeList.appendChild(li);
+                });
+                
+                renderInsights(allInsights);
+            } catch (err) {
+                console.error("Failed to load data:", err);
+            }
+        }
+
+        async function deleteTopic(id) {
+            if (!confirm("Are you sure you want to delete this topic and all its insights?")) return;
+            try {
+                await fetch('/api/topics/' + id, { method: 'DELETE' });
+                document.getElementById('topic-input').value = '';
+                loadData();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function generateTopic() {
+            const input = document.getElementById('topic-input');
+            const btn = document.getElementById('btn-generate');
+            const topic = input.value.trim();
+            if (!topic) return;
+            
+            btn.disabled = true;
+            btn.textContent = "Claude Haiku 4.5 is thinking...";
+            
+            try {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic })
+                });
+                const data = await res.json();
+                if (data.status === "success") {
+                    input.value = '';
+                    await loadData();
+                    // Auto select the new theme
+                    const newLi = document.querySelector(`.theme-list li[data-id="${data.topic_id}"]`);
+                    if (newLi) filterByTheme(data.topic_id, newLi);
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Failed to generate insights.");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Generate (Live Miner)";
+            }
+        }
+        
+        async function uploadCSV(inputEl) {
+            const file = inputEl.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            try {
+                const btn = inputEl.nextElementSibling;
+                const oldText = btn.innerHTML;
+                btn.innerHTML = "⏳ Uploading...";
+                
+                const res = await fetch('/api/upload_apple_ads', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (data.status === "success") {
+                    alert(`Successfully imported ${data.imported_count} keywords from CSV!`);
+                    // In a real app we'd reload the table data here
+                } else {
+                    alert("Error: " + data.error);
+                }
+                btn.innerHTML = oldText;
+            } catch(e) {
+                console.error(e);
+                alert("Upload failed.");
+            }
+            inputEl.value = '';
+        }
+        
+        function filterByTheme(themeId, el) {
+            document.querySelectorAll('.theme-list li').forEach(li => li.classList.remove('active'));
+            if (el) el.classList.add('active');
+            
+            if (themeId === 'all') {
+                renderInsights(allInsights);
+                return;
+            }
+            
+            // Now correctly filtering by topic_id across all insight types!
+            const filtered = {
+                pain_points: allInsights.pain_points.filter(p => p.topic_id === themeId),
+                questions: allInsights.questions.filter(q => q.topic_id === themeId),
+                objections: allInsights.objections.filter(o => o.topic_id === themeId),
+                phrases: allInsights.phrases.filter(ph => ph.topic_id === themeId)
+            };
+            renderInsights(filtered);
+        }
+        
+        function getSourceLink(url) {
+            if (!url) return '';
+            let label = "Link";
+            try {
+                let hostname = new URL(url).hostname.replace('www.', '');
+                if (hostname.includes('ycombinator')) label = "HackerNews";
+                else if (hostname.includes('reddit')) label = "Reddit";
+                else label = hostname;
+            } catch(e){}
+            return `<div style="margin-top: 10px;"><a href="${url}" target="_blank" class="source-link" style="color: #1c7ed6; font-size: 0.85rem; text-decoration: none; font-weight: 500;">🔗 View source on ${label}</a></div>`;
+        }
+
+        function renderInsights(data) {
+            const lp = document.getElementById('list-pain');
+            lp.innerHTML = data.pain_points.map(p => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${p.title}</div>
+                        <div class="badge pain">Sev: ${p.severity_score}</div>
+                    </div>
+                    <div class="stat">
+                        <span>Frequency: ${p.frequency} mentions</span>
+                    </div>
+                    ${getSourceLink(p.source_url)}
+                </div>
+            `).join('');
+            document.getElementById('count-pain').textContent = data.pain_points.length;
+            
+            const lq = document.getElementById('list-question');
+            lq.innerHTML = data.questions.map(q => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">"${q.question}"</div>
+                        <div class="badge question">${q.intent}</div>
+                    </div>
+                    <div class="stat"><span>Urgency: ${q.urgency_score}</span></div>
+                    ${getSourceLink(q.source_url)}
+                </div>
+            `).join('');
+            document.getElementById('count-question').textContent = data.questions.length;
+            
+            const lo = document.getElementById('list-objection');
+            lo.innerHTML = data.objections.map(o => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">${o.objection}</div>
+                        <div class="badge objection">${o.objection_type}</div>
+                    </div>
+                    <div style="margin-top:0.5rem; color:var(--text-light); font-size:0.85rem;">
+                        <strong>Underlying concern:</strong> ${o.stated_concern}
+                    </div>
+                    ${getSourceLink(o.source_url)}
+                </div>
+            `).join('');
+            document.getElementById('count-objection').textContent = data.objections.length;
+            
+            const lph = document.getElementById('list-phrase');
+            lph.innerHTML = data.phrases.map(p => `
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title phrase-exact">"${p.exact_text}"</div>
+                        <div class="badge phrase">${p.category}</div>
+                    </div>
+                    <div style="margin-top:0.5rem; font-style:italic; color:var(--text-light); font-size:0.85rem;">
+                        "${p.exact_context}"
+                    </div>
+                    <div class="stat"><span>Frequency: ${p.occurrences} mentions</span></div>
+                    ${getSourceLink(p.source_url)}
+                </div>
+            `).join('');
+            document.getElementById('count-phrase').textContent = data.phrases.length;
+        }
+
+        loadData();
+    </script>
+</body>
+</html>

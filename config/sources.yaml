@@ -1,0 +1,156 @@
+version: 1
+
+defaults:
+  enabled: true
+  priority: medium
+  collection_frequency: daily
+  max_age_days: 30
+  min_relevance_score: 50
+  collect_comments: true
+  max_items_per_run: 100
+  max_comments_per_item: 50
+  language: en
+  segments: []
+
+sources:
+  - id: reddit_mindfulness
+    platform: reddit
+    type: subreddit
+    name: "r/Mindfulness"
+    url: "https://www.reddit.com/r/Mindfulness/"
+    priority: high
+    collection_frequency: daily
+    target_topics: [mindfulness practice, daily habits, meditation dropout]
+    relevance_keywords: [reminder, habit, routine, streak, forget, consistency, timer, bell]
+    relevance_phrases: ["can't stick with it", "keep forgetting", "fell off"]
+    exclusion_keywords: [retreat, teacher training, ayahuasca, supplement]
+    min_relevance_score: 45
+    segments: [beginner, routine_rebuilder]
+    platform_options:
+      sort: new
+      min_comments: 2
+    notes: "Primary source for practice-abandonment language."
+
+  - id: reddit_productivity
+    platform: reddit
+    type: subreddit
+    name: "r/productivity"
+    url: "https://www.reddit.com/r/productivity/"
+    priority: medium
+    target_topics: [focus, breaks, workday structure, burnout prevention]
+    relevance_keywords: [break, focus, pomodoro, reminder, notification, overwhelm, deep work]
+    exclusion_keywords: [resume, salary, job interview, crypto, "hiring"]
+    min_relevance_score: 60
+    max_items_per_run: 60
+    notes: "High volume, low density — gate is deliberately strict."
+
+  - id: reddit_adhd_routines
+    platform: reddit
+    type: subreddit
+    name: "r/getdisciplined"
+    url: "https://www.reddit.com/r/getdisciplined/"
+    priority: medium
+    target_topics: [routine building, accountability, habit collapse]
+    relevance_phrases: ["I always start and stop", "nothing sticks", "reminders don't work"]
+    exclusion_keywords: [nofap, weight loss challenge]
+    segments: [adhd_adjacent, routine_rebuilder]
+    min_relevance_score: 55
+
+  - id: reddit_kw_mindful_reminders
+    platform: reddit
+    type: keyword
+    name: "Reddit search: mindful reminder apps"
+    query: '("mindfulness app" OR "meditation reminder" OR "mindful bell" OR "interval timer") self:yes'
+    priority: high
+    collection_frequency: daily
+    platform_options:
+      subreddits: [Mindfulness, Meditation, productivity, digitalminimalism, iosapps]
+      sort: new
+      time_filter: week
+    target_topics: [app selection, app fatigue, reminder apps]
+    min_relevance_score: 55
+    notes: "Catches high-intent app-shopping threads the subreddit listings miss."
+
+  - id: yt_calm_productivity_channels
+    platform: youtube
+    type: keyword
+    name: "YouTube: calm productivity / mindful workday"
+    query: "calm productivity mindful workday routine"
+    priority: medium
+    collection_frequency: every_2d
+    collect_comments: true
+    max_items_per_run: 15
+    max_comments_per_item: 100
+    platform_options:
+      order: relevance
+      published_after_days: 60
+      relevance_language: en
+      comment_order: relevance
+    target_topics: [workday routine, focus rituals, screen fatigue]
+    exclusion_keywords: [giveaway, "link in bio", "free course"]
+    min_relevance_score: 55
+    notes: "Comments only; video transcripts are out of MVP scope."
+
+  - id: yt_channel_example_wellness
+    platform: youtube
+    type: channel
+    name: "Example Wellness Channel (illustrative)"
+    url: "https://www.youtube.com/@example-wellness"
+    priority: low
+    collection_frequency: weekly
+    collect_comments: true
+    max_comments_per_item: 60
+    platform_options:
+      include_shorts: true
+      min_views: 2000
+    notes: "Fictional example. Audience questions in comments are the target, not the videos."
+
+  - id: x_kw_meditation_reminder
+    platform: x
+    type: keyword
+    name: "X search: meditation reminder"
+    query: '("meditation reminder" OR "mindfulness bell") -is:retweet lang:en'
+    enabled: false
+    priority: low
+    collection_frequency: daily
+    platform_options:
+      exclude_retweets: true
+    notes: "Enable only when an API tier permitting search is active. Adapter reports 'unsupported: no_search_access' otherwise."
+
+  - id: rss_example_forum
+    platform: forum
+    type: feed
+    name: "Example Habit Forum — latest threads (illustrative)"
+    url: "https://forum.example.com/latest.rss"
+    priority: medium
+    collection_frequency: daily
+    platform_options:
+      full_text_fetch: true
+    target_topics: [habit tracking, streaks, routine tools]
+    exclusion_patterns: ['^\[Announcement\]', 'sponsored']
+    min_relevance_score: 50
+
+  - id: community_example_discourse
+    platform: community
+    type: feed
+    name: "Example Focus Community (illustrative)"
+    url: "https://community.example.com/latest.json"
+    priority: low
+    collection_frequency: every_2d
+    rate_limit_class: conservative
+    min_relevance_score: 55
+    notes: "Public endpoint only. No login. If it ever requires auth, mark unsupported."
+
+  - id: website_example_reviews
+    platform: website
+    type: sitemap
+    name: "Example Review Site (illustrative, Phase 5)"
+    url: "https://reviews.example.com/sitemap.xml"
+    enabled: false
+    priority: low
+    collection_frequency: weekly
+    robots_respect: true
+    platform_options:
+      path_include: ["/reviews/mindfulness-apps/"]
+      max_pages_per_run: 25
+    notes: "Disabled until ToS review completes (see DOCUMENTATION-COMPLETE open questions)."
