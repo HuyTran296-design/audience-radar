@@ -1,177 +1,116 @@
-# Audience Radar — Documentation Package
+# Audience Radar
 
 > **Reddit Integration Note**
 > 
 > **Status:** Pending Reddit Data API approval.
 > 
-> The Reddit adapter is implemented as an external, read-only data source. OAuth credentials are not included in this repository and are managed securely via environment variables.
+> The Reddit adapter interface and integration design are implemented. Live Reddit API access remains disabled pending Reddit Data API approval.
+>
+> - Public data only
+> - Official Reddit Data API only
+> - No scraping
+> - No private communities
+> - No posting, commenting, voting, or moderation
+> - OAuth credentials are not included in this repository and are managed securely via environment variables.
 
-**Version:** 1.0 (specification freeze for implementation)
-**Status:** Phase 0 complete — ready for an AI coding agent (Antigravity) to implement
-**Owner:** Product / Growth
-**Last updated:** 2026-08-18
+## 1. Reddit API Usage & Compliance
 
----
+Audience Radar uses Reddit's official Data API as a read-only source for internal audience research.
 
-## 1. What Audience Radar is
+The Reddit integration:
+- Uses OAuth 2 authentication.
+- Uses the official Reddit Data API only.
+- Reads publicly accessible posts and comments within explicitly configured communities.
+- Does not access private messages or private communities.
+- Does not post, comment, vote, moderate, or automate Reddit accounts.
+- Does not scrape Reddit pages.
+- Does not bypass authentication, rate limits, anti-bot protections, paywalls, or other technical controls.
+- Monitors API rate-limit information and backs off when required.
+- Does not sell, license, or redistribute Reddit content.
+- Does not use Reddit content to train, fine-tune, or otherwise improve an AI/ML model unless explicitly permitted by Reddit and the applicable rights holders.
+- Keeps source references so findings can be traced back to the original Reddit conversation.
+- Applies human review before insights are used downstream.
+- Removes Reddit content when required by Reddit's policies or the approved use case.
 
-Audience Radar is an **audience intelligence system**. It continuously listens to public conversations from a defined target audience (Reddit, YouTube, X, forums, RSS, public communities), filters aggressively for signal, and produces **evidence-backed intelligence**:
+## 2. Reddit Data Scope
 
-- what the audience is struggling with (pains)
-- what they keep asking (hot questions)
-- why they don't buy (objections)
-- the exact words they use (audience language)
-- what is accelerating right now (emerging topics)
-- what competitors cover and, more importantly, what they *don't* (competitor gaps)
-- what to create next (content opportunities) and what to build next (product opportunities)
+The Reddit integration is limited to publicly accessible posts and comments available through the official Reddit Data API.
 
-It is not a dashboard of vanity metrics and not a scraper. It is a pipeline that turns raw public conversation into **ranked, traceable, reviewable decisions**.
+It does not access:
+- private messages
+- private communities
+- restricted user data
+- user credentials
+- account passwords
+- voting actions
+- moderation actions
 
-## 2. Why it exists
+## 3. Reddit Data Retention
 
-Creators and small teams guess. They guess topics, guess hooks, guess wording, and guess what their market objects to. The information that would remove the guessing is public — it's sitting in comment threads — but it is unstructured, repetitive, and too voluminous to read.
+Audience Radar stores only the Reddit data necessary for its approved use case.
+The system does not intentionally retain deleted Reddit content.
+Reddit-sourced content and user-related data are subject to deletion when required by Reddit's policies, applicable terms, or an approved use case.
+Source identifiers and metadata are kept only as necessary for traceability and compliance.
 
-Existing tools each solve one slice and none solve the job:
+*(Note: Deletion handling is part of the Reddit adapter compliance implementation and must be completed before production use.)*
 
-| Category | What it gives you | What it doesn't |
-|---|---|---|
-| Social listening (Brandwatch, Mention) | Brand mention volume + sentiment | Doesn't tell you what to make; brand-centric, not audience-centric |
-| Generic scrapers | Rows of text | No relevance, no interpretation, no evidence chain |
-| Social analytics | Your own post performance | Nothing about people who never saw your posts |
-| AI content generators | Fluent output from a blank prompt | No grounding in real audience demand; invents the premise |
-| Competitor monitors | What competitors published | Not what the audience wanted and didn't get |
+## 4. What Audience Radar is
 
-Audience Radar sits between listening and creating: **demand discovery with citations**.
+Audience Radar is an internal audience research tool that retrieves relevant public conversations through official platform APIs and organizes them into evidence-backed insights for human review.
 
-## 3. How the system works
+**Why it exists:** Audience Radar helps an internal marketing team identify recurring audience questions, pain points, and language from public conversations. The system provides source references so findings can be reviewed against the original conversation before use.
+
+**Important distinction:** Audience Radar does not scrape Reddit pages. Reddit data is accessed only through the official Reddit Data API.
+
+## 5. Insight Types
+
+Audience Radar extracts the following core insights:
+- **Pains** (what the audience is struggling with)
+- **Questions** (what they keep asking)
+- **Objections** (why they hesitate)
+- **Audience language** (exact words and phrasing)
+- **Emerging topics**
+
+## 6. How the system works
 
 ```text
-Sources (Reddit / YouTube / X / RSS / forums / websites)
-        ↓  Collection Layer        adapters, rate limits, ToS-safe access
-        ↓  Normalization Layer     one canonical Conversation shape, dedup
-        ↓  Storage Layer           raw + normalized, immutable, timestamped
-        ↓  AI Analysis Layer       cheap relevance gate → LLM insight extraction
+Sources (e.g., Official Reddit API)
+        ↓  Collection Layer        minimally necessary source data
+        ↓  Normalization Layer     one canonical shape for analysis
+        ↓  Storage Layer           retrieval metadata + normalized records
+        ↓  AI Analysis Layer       LLM insight extraction (content analysis only)
         ↓  Insight Layer           pains / questions / objections / language / topics
-        ↓  Scoring Layer           relevance, pain, frequency, trend, intent, competition, opportunity, confidence
-        ↓  Reporting Layer         weekly radar + markdown knowledge base
-        ↓  Content Engine          (Phase 4 integration, contract defined here)
+        ↓  Reporting Layer         human-reviewable summaries
 ```
 
 Two non-negotiable properties:
 
-1. **Evidence-first.** Every insight carries `evidence[]` pointing at real, retrievable sources. `Observation → Evidence → AI interpretation → Confidence → Recommendation` — never `AI assumption → fact`.
-2. **Layers are append-only.** AI interpretation never overwrites raw or normalized data.
+1. **Evidence-first:** Every insight carries source references linking back to the original Reddit post or comment where applicable.
+2. **Analysis Separation:** AI-generated interpretations are separated from source data. Reddit-sourced content can be removed when required by Reddit's policies or deletion requirements.
 
-## 4. Documentation structure
+## 7. AI Agents
 
-```text
-README.md                                  ← you are here
-00-product/
-  product-brief.md                         vision, personas, JTBD, MVP scope
-  goals-and-success-metrics.md             product / content / system metrics + MVP targets
-  roadmap.md                               phases 0–5 with exit criteria
-01-sources/
-  sources.md                               canonical source config schema + examples
-  competitors.md                           competitor config + what to extract
-02-insights/
-  audience-pains.md                        pain point schema + lifecycle
-  hot-questions.md                         question schema + intent taxonomy
-  objections.md                            objection schema + taxonomy
-  audience-language.md                     verbatim language capture (3-layer separation)
-  emerging-topics.md                       trend detection rules
-  competitor-gaps.md                       demand vs coverage + gap scoring
-03-opportunities/
-  content-opportunities.md                 opportunity schema + weighted scoring
-  product-opportunities.md                 product/feature/service/offer + evidence thresholds
-  weekly-radar.md                          weekly executive summary + worked example
-04-system/
-  architecture.md                          layers, MVP stack, deployment
-  data-model.md                            entities, fields, relationships, indexes
-  agents.md                                9 AI agents: contracts + guardrails
-  workflows.md                             scheduled workflows + state machines
-  scoring-system.md                        all formulas, ranges, thresholds  ← canonical
-  source-adapters.md                       adapter interface + per-platform limits
-  implementation-plan.md                   13 milestones for Antigravity  ← build order
-DOCUMENTATION-COMPLETE.md                  decisions, risks, open questions, agent instructions
-```
+The system uses specialized AI agents to analyze retrieved content:
+- **Insight Agent:** Extracts pains, questions, objections, and language from one item.
+- **Clustering Agent:** Merges many phrasings of the same problem into one topic.
+- **Trend Agent:** Compares aligned time windows and classifies momentum.
+- **Radar Agent:** Writes the weekly executive summary from trusted insights only.
 
-**Conflict rule:** if two documents disagree, precedence is
-`04-system/scoring-system.md` (numbers) > `04-system/data-model.md` (shapes) > `DOCUMENTATION-COMPLETE.md` (decisions) > everything else.
+**Important constraint:** These agents operate on normalized research records and do not train models on Reddit content. LLMs are used solely for the analysis of retrieved content; Reddit content is not used to train or fine-tune models.
 
-## 5. MVP in one paragraph
+## 8. Development & Implementation Rules
 
-A modular monolith in Python 3.12 with a Typer CLI and APScheduler, SQLite (WAL) for storage, `sqlite-vec` for embeddings, a Reddit adapter (official API) + YouTube adapter (Data API v3) + RSS adapter at launch, X behind a feature flag pending access, a two-stage relevance gate (rules + embeddings, LLM only for the grey zone), LLM insight extraction with strict JSON schemas and mandatory evidence IDs, HDBSCAN-style semantic clustering into topics, week-over-week trend detection, an opportunity scorer, and a weekly radar rendered to markdown in a git-tracked `knowledge/` directory. Human review promotes insights from `candidate` to `trusted`. Nothing is published downstream that hasn't been reviewed.
+1. Never implement a collection method that bypasses authentication, anti-bot protection, paywalls, or private-group access. 
+2. Do not use Reddit content to train, fine-tune, or otherwise improve an AI/ML model unless explicitly permitted by Reddit and the applicable rights holders.
+3. The Reddit adapter must monitor Reddit API rate-limit headers and back off when limits are approached. It must not intentionally exceed or circumvent Reddit API limits.
+4. Nothing is published downstream that hasn't been human-reviewed.
 
-## 6. Data flow (canonical)
+## 9. Roadmap
 
-```text
-Raw Data          immutable payload as returned by the platform (+ fetch metadata)
-   ↓
-Normalized Data   Conversation / Comment / Author in one canonical shape
-   ↓
-AI Analysis       per-item extraction: relevance, pains, questions, objections, phrases
-   ↓
-Aggregated        clusters → PainPoint / Question / Objection / Topic / Trend / Gap
-   ↓
-Opportunities     scored, ranked, human-reviewable
-   ↓
-Reports           weekly radar + markdown knowledge base
-```
-
-## 7. AI agents
-
-| Agent | One-line job |
+| Phase | Theme |
 |---|---|
-| Collector | Plan and execute collection runs per source, respect limits |
-| Relevance | Decide in/out for the target audience (grey zone only) |
-| Insight | Extract pains, questions, objections, desires, intent, language from one item |
-| Clustering | Merge many phrasings of the same problem into one topic |
-| Trend | Compare aligned time windows, classify momentum |
-| Competitor | Characterize competitor coverage and performance |
-| Gap | Diff audience demand against competitor supply |
-| Opportunity | Turn insights + gaps into scored content/product opportunities |
-| Radar | Write the weekly executive summary from trusted insights only |
-
-Full contracts, system instructions, and hallucination guards: `04-system/agents.md`.
-
-## 8. Insight types
-
-`pain_point` · `question` · `objection` · `desired_outcome` · `audience_phrase` · `topic` · `trend` · `competitor_gap` · `content_opportunity` · `product_opportunity`
-
-All share the review lifecycle:
-`detected → analyzed → candidate → reviewed → trusted → archived` (with `rejected` as a labelled terminal state that feeds relevance training).
-
-## 9. Scoring
-
-All scores are integers `0–100` and are reported **in bands**, not as false precision:
-
-| Band | Range |
-|---|---|
-| low | 0–24 |
-| moderate | 25–49 |
-| high | 50–74 |
-| critical / exceptional | 75–100 |
-
-Confidence is `0.00–1.00` (2 dp) with bands `low <0.5`, `medium 0.5–0.74`, `high ≥0.75`. Insights below `0.5` confidence never appear in a radar report as anything but "watchlist". Canonical formulas: `04-system/scoring-system.md`.
-
-## 10. Roadmap
-
-| Phase | Theme | Outcome |
-|---|---|---|
-| 0 | Documentation | This package |
-| 1 | MVP | Reddit + YouTube + RSS → pains/questions → weekly radar |
-| 2 | Intelligence | Clustering quality, trends, audience language, human-in-the-loop |
-| 3 | Competitor intelligence | Competitor coverage + gap engine |
-| 4 | Content Engine integration | Opportunities → briefs → multi-platform content |
-| 5 | Market Radar | Multi-audience, multi-language, product opportunity discovery |
-
-Details and exit criteria: `00-product/roadmap.md`.
-
-## 11. How Antigravity should use this documentation
-
-1. Read `DOCUMENTATION-COMPLETE.md` first — it contains the binding decisions and the exact build instructions.
-2. Read `04-system/implementation-plan.md` and implement **milestone by milestone**. Do not skip ahead; each milestone has acceptance criteria and tests that must pass before the next begins.
-3. Treat `04-system/data-model.md` and `04-system/scoring-system.md` as the source of truth for shapes and numbers. If a prose file disagrees, the system docs win.
-4. Do not invent new architecture. If a requirement seems missing, check `DOCUMENTATION-COMPLETE.md § Open questions` — if it's listed there, stub it behind an interface and keep going.
-5. Never implement a collection method that bypasses authentication, anti-bot protection, paywalls, or private-group access. If a source cannot be collected legally through a documented API or public feed, mark the adapter `unsupported` and surface the reason.
-6. Prioritize working software over abstraction. One concrete adapter working end-to-end beats three abstract ones.
+| 0 | Documentation |
+| 1 | Reddit API integration |
+| 2 | Audience insight extraction |
+| 3 | Human review and reporting |
+| 4 | Additional approved data sources |
